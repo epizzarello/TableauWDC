@@ -71,6 +71,13 @@
                         "longitude" : resp[i].longitude,
                         "latitude" : resp[i].latitude
                     };
+                    if(resp[i].operation_season == "M") {
+                        dataRow.operation_season = resp[i].operation_months_code;
+                        dataRow.operation_months_code = resp[i].operation_season;
+                    } else {
+                        dataRow.operation_season = resp[i].operation_season;
+                        dataRow.operation_months_code = resp[i].operation_months_code;
+                    };
                     if(resp[i].hasOwnProperty("market_link")) {
                         dataRow.market_link = resp[i].market_link.url;
                     } else {
