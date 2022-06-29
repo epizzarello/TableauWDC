@@ -50,9 +50,8 @@
               var tableData = [];
                 
                // iterate over the JSON array
-                for (var i = 0; i<resp.length; i++) {
-                    if(resp[i].hasOwnProperty("market_link")) {
-                    tableData.push({
+                for (let i = 0; i<resp.length; i++) {
+                    let dataRow = {
                         "county" : resp[i].county,
                         "market_name" : resp[i].market_name,
                         "market_location" : resp[i].market_location,
@@ -69,33 +68,15 @@
                         "snap_status" : resp[i].snap_status,
                         "fc" : resp[i].fc,
                         "fca" : resp[i].fca,
-                        "latitude" : resp[i].latitude,
                         "longitude" : resp[i].longitude,
-                        "market_link" : resp[i].market_link.url,
-                    });
-                    } else {
-                    tableData.push({
-                        "county" : resp[i].county,
-                        "market_name" : resp[i].market_name,
-                        "market_location" : resp[i].market_location,
-                        "address_line_1" : resp[i].address_line_1,
-                        "city" : resp[i].city,
-                        "state" : resp[i].state,
-                        "zip" : resp[i].zip,
-                        "contact" : resp[i].contact,
-                        "phone" : resp[i].phone,
-                        "operation_hours" : resp[i].operation_hours,
-                        "operation_season" : resp[i].operation_season,
-                        "operation_months_code" : resp[i].operation_months_code,
-                        "fmnp" : resp[i].fmnp,
-                        "snap_status" : resp[i].snap_status,
-                        "fc" : resp[i].fc,
-                        "fca" : resp[i].fca,
-                        "latitude" : resp[i].latitude,
-                        "longitude" : resp[i].longitude,
-                        "market_link" : resp[i].market_link,
-                    });
+                        "latitude" : resp[i].latitude
                     };
+                    if(resp[i].hasOwnProperty("market_link")) {
+                        dataRow.market_link = resp[i].market_link.url;
+                    } else {
+                        dataRow.market_link = resp[i].market_link;
+                    };
+                    tableData.push(dataRow);
                     
                 };
 
