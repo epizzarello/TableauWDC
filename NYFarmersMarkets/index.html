@@ -95,12 +95,42 @@
                         //split into date ranges
                         dateRangeArray = dateText.split(/;\s?/);
                         dataRow.operation_dates = "";
+                        let moDays = {
+                            "Jan":31,
+                            "Feb":28,
+                            "Mar":31,
+                            "Apr":30,
+                            "May":31,
+                            "Jun":30,
+                            "Jul":31,
+                            "Aug":31,
+                            "Sep":30,
+                            "Oct":31,
+                            "Nov":30,
+                            "Dec":31
+                        };
                         for (let dateRange of dateRangeArray) {
                             startEnd = dateRange.split(/\s?-\s?/);
-                            dataRow.operation_dates += startEnd[0].substring(0,3)+" ";
-                            dataRow.operation_dates += startEnd[0].match(/\d{1,2}/)+"-";
-                            dataRow.operation_dates += startEnd[1].substring(0,3)+" ";
-                            dataRow.operation_dates += startEnd[1].match(/\d{1,2}/)+"; ";
+                            if(startEnd[0].search("Mid") >= 0) {
+                                dataRow.operation_dates += startEnd[0].substr(4,3)+" "+Math.trunc(moDays[startEnd[0].substr(4,3)]/2)+"-";
+                            } else {
+                                dataRow.operation_dates += startEnd[0].substring(0,3)+" ";
+                                if(startEnd[0].search(/\d{1,2}/) >= 0) {
+                                    dataRow.operation_dates += startEnd[0].match(/\d{1,2}/)+"-";
+                                } else {
+                                    dataRow.operation_dates += "1-";
+                                };
+                            };
+                            if(startEnd[1].search("Mid") >= 0) {
+                                dataRow.operation_dates += startEnd[1].substr(4,3)+" "+Math.trunc(moDays[startEnd[1].substr(4,3)]/2)+"-";
+                            } else {
+                                dataRow.operation_dates += startEnd[1].substring(0,3)+" ";
+                                if(startEnd[1].search(/\d{1,2}/) >= 0) {
+                                    dataRow.operation_dates += startEnd[1].match(/\d{1,2}/)+"-";
+                                } else {
+                                    dataRow.operation_dates += moDays[startEnd[1].substring(0,3)]+"; ";
+                                };
+                            };
                         };
                         dataRow.operation_dates = dataRow.operation_dates.replace(/;\s(?=$)/,"");
                     };
