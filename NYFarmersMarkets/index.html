@@ -126,7 +126,7 @@
                             } else {
                                 dataRow.operation_dates += startEnd[1].substring(0,3)+" ";
                                 if(startEnd[1].search(/\d{1,2}/) >= 0) {
-                                    dataRow.operation_dates += startEnd[1].match(/\d{1,2}/)+"-";
+                                    dataRow.operation_dates += startEnd[1].match(/\d{1,2}/);
                                 } else {
                                     dataRow.operation_dates += moDays[startEnd[1].substring(0,3)]+"; ";
                                 };
