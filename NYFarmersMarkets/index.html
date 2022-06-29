@@ -19,9 +19,9 @@
                 { id : "market_name", alias : "Market Name", dataType : tableau.dataTypeEnum.string },
                 { id : "market_location", alias : "Market Location", dataType : tableau.dataTypeEnum.string },
                 { id : "address_line_1", alias : "Address", dataType : tableau.dataTypeEnum.string },
-                { id : "city", alias : "City", dataType : tableau.dataTypeEnum.string },
-                { id : "state", alias : "State", dataType : tableau.dataTypeEnum.string },
-                { id : "zip", alias : "Zip Code", dataType : tableau.dataTypeEnum.string },
+                { id : "city", alias : "City", dataType : tableau.dataTypeEnum.string, geoRole : tableau.geographicRoleEnum.city },
+                { id : "state", alias : "State", dataType : tableau.dataTypeEnum.string, geoRole : tableau.geographicRoleEnum.state_province },
+                { id : "zip", alias : "Zip Code", dataType : tableau.dataTypeEnum.string, geoRole : tableau.geographicRoleEnum.zip_code_postcode },
                 { id : "contact", alias : "Contact Person", dataType : tableau.dataTypeEnum.string },
                 { id : "market_link", alias : "Market Website", dataType : tableau.dataTypeEnum.string },
                 { id : "operation_hours", alias : "Days and Hours of Operation", dataType : tableau.dataTypeEnum.string },
@@ -31,8 +31,8 @@
                 { id : "snap_status", alias : "Accepts Snap?", dataType : tableau.dataTypeEnum.string },
                 { id : "fc", alias : "FreshConnect Check?", dataType : tableau.dataTypeEnum.string },
                 { id : "fca", alias : "FreshConnect Check Accepted?", dataType : tableau.dataTypeEnum.string },
-                { id : "latitude", alias : "Latitude", dataType : tableau.dataTypeEnum.string },
-                { id : "longitude", alias : "Longitude", dataType : tableau.dataTypeEnum.string }
+                { id : "latitude", alias : "Latitude", dataType : tableau.dataTypeEnum.float },
+                { id : "longitude", alias : "Longitude", dataType : tableau.dataTypeEnum.float }
 
             ];
 
