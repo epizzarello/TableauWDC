@@ -26,6 +26,7 @@
                 { id : "market_link", alias : "Market Website", dataType : tableau.dataTypeEnum.string },
                 { id : "operation_hours", alias : "Days and Hours of Operation", dataType : tableau.dataTypeEnum.string },
                 { id : "operation_season", alias : "Seasons of Operation", dataType : tableau.dataTypeEnum.string },
+                { id : "operation_dates", alias : "Dates of Operation", dataType : tableau.dataTypeEnum.string },
                 { id : "operation_months_code", alias : "Season of Operation Code", dataType : tableau.dataTypeEnum.string },
                 { id : "fmnp", alias : "Farmers Market Nutrition Program?", dataType : tableau.dataTypeEnum.string },
                 { id : "snap_status", alias : "Accepts Snap?", dataType : tableau.dataTypeEnum.string },
@@ -82,6 +83,26 @@
                         dataRow.market_link = resp[i].market_link.url;
                     } else {
                         dataRow.market_link = resp[i].market_link;
+                    };
+                    //Making a more standard date field to use with tableau calculations
+                    if(dataRow.operation_season.toLowerCase() == "year-round") {
+                        dataRow.operation_season = "Year-Round";
+                        dataRow.operation_dates = "Jan 1-Dec 31";
+                    } else {
+                        let dateText = dataRow.operation_season.trim();
+                        //get rid of years, standardize commas & semicolons as semicolons
+                        dateText = dateText.replace(/,?\s?\d{4}/g, "").replace(",",";").trim();
+                        //split into date ranges
+                        dateRangeArray = dateText.split(/;\s?/);
+                        dataRow.operation_dates = "";
+                        for (let dateRange of dateRangeArray) {
+                            startEnd = dateRange.split(/\s?-\s?/);
+                            dataRow.operation_dates += startEnd[0].substring(0,3)+" ";
+                            dataRow.operation_dates += startEnd[0].match(/\d{1,2}/)+"-";
+                            dataRow.operation_dates += startEnd[1].substring(0,3)+" ";
+                            dataRow.operation_dates += startEnd[1].match(/\d{1,2}/)+"; ";
+                        };
+                        dataRow.operation_dates = dataRow.operation_dates.replace(/;\s(?=$)/,"");
                     };
                     tableData.push(dataRow);
                     
