@@ -14,65 +14,73 @@
         var myConnector = tableau.makeConnector();
      
         myConnector.getSchema = function (schemaCallback) {
-            var cols = [
-                { id : "NAME", alias : "GEO Name", dataType : tableau.dataTypeEnum.string },
-                { id : "County_or_State", alias : "County/State", dataType : tableau.dataTypeEnum.string },
-                { id : "YEAR", alias : "Year", dataType : tableau.dataTypeEnum.int },
-                { id : "GEO_ID", alias : "GEO ID", dataType : tableau.dataTypeEnum.string },
-                { id : "SAEMHI_PT", alias : "Median Income", dataType : tableau.dataTypeEnum.float },
-                { id : "state", alias : "State ID", dataType : tableau.dataTypeEnum.string }
+            var countyCols = [
+                { id : "County_Name", alias : "County", dataType : tableau.dataTypeEnum.string },
+                { id : "County_Year", alias : "Year (County Inc)", dataType : tableau.dataTypeEnum.int },
+                { id : "County_Med_Income", alias : "Median Income (County)", dataType : tableau.dataTypeEnum.float },
+                { id : "County_ID", alias : "County ID", dataType : tableau.dataTypeEnum.string },
+                { id : "County_State_ID", alias : "State ID (County)", dataType : tableau.dataTypeEnum.string }
             ];
 
-            var tableSchema = {
-                id : "MedianIncome",
-                alias : "Median Income",
-                columns : cols
+            var countyTableSchema = {
+                id : "CountyMedianIncome",
+                alias : "County Median Income",
+                columns : countyCols
+            };
+            
+            var stateCols = [
+                { id : "State_Name", alias : "State", dataType : tableau.dataTypeEnum.string },
+                { id : "State_Year", alias : "Year (State Inc)", dataType : tableau.dataTypeEnum.int },
+                { id : "State_Med_Income", alias : "Median Income (State)", dataType : tableau.dataTypeEnum.float },
+                { id : "State_ID", alias : "State ID (State)", dataType : tableau.dataTypeEnum.string }
+            ];
+            
+            var stateTableSchema = {
+                id : "StateMedianIncome",
+                alias : "State Median Income",
+                columns : stateCols
             };
 
-            schemaCallback([tableSchema]);
+            schemaCallback([countyIncomeTable, StateIncomeTable]);
         };
      
         myConnector.getData = function (table, doneCallback) {
-            $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=state&time=from+2007+to+2020", function (respST) {
-                var stateTableData = [];
-                
-                // iterate over state json array
-                for (let s = 0; s<respST.length; s++) {
-                    let stRow = {
-                        "NAME" : respST[s].NAME,
-                        "County_or_State" : "State",
-                        "Year" : parseInt(respST[s].YEAR),
-                        "GEO_ID" : respST[s].state,
-                        "SAEMHI_PT" : parseFloat(respST[s].SAEMHI_PT),
-                        "state" : respST[s].state
-                    };
-                    stateTableData.push(stRow);
-                };
-                table.appendRows(stateTableData);
-            });
-            $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=COUNTY&time=from+2007+to+2020", function (resp) {
-              var countyTableData = [];
-                
-               // iterate over the county JSON array
-                for (let i = 0; i<resp.length; i++) {
-                    let dataRow = {
-                        "NAME" : resp[i].NAME,
-                        "County_or_State" : "County",
-                        "YEAR" : parseInt(resp[i].YEAR),
-                        "GEO_ID" : resp[i].county,
-                        "SAEMHI_PT" : parseFloat(resp[i].SAEMHI_PT),
-                        "state" : resp[i].state
-                    };
-                    countyTableData.push(dataRow);
+            //check if state or county table based on table id
+            if (table.tableInfo.id == "StateMedianIncome") {
+                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=state:*&time=from+2007+to+2020", function (respST) {
+                    var stateTableData = [];
                     
-                };
-
-                table.appendRows(countyTableData);
-
-                doneCallback();
+                    // iterate over state json data array
+                    for (let st = 0; st < respST.length; st++) {
+                        stateTableData.push({
+                            "State_Name" : respST[st].NAME,
+                            "State_Year" : parseInt(respST[st].YEAR),
+                            "State_Med_Income" : parseFloat(respST[st].SAEMHI_PT),
+                            "State_ID" : respST[st].state
+                        });
+                    }
+                    table.appendRows(stateTableData);
+                    doneCallback();
+                });
+            } else if (table.tableInfo.id == "CountyMedianIncome") {
+                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=COUNTY&time=from+2007+to+2020", function (respCT) {
+                    var countyTableData = [];
+                    
+                    // iterate over county level data
+                    for (let ct = 0; ct < respCT.length; ct++) {
+                        countyTableData.push({
+                            "County_Name" : respCT[ct].NAME,
+                            "County_Year" : respCT[ct].YEAR,
+                            "County_Med_Income" : respCT[ct].SAEMHI_PT,
+                            "County_ID" : respCT[ct].county,
+                            "County_State_ID" : respCT[ct].state
+                        });
+                    }
+                    table.appendRows(countyTableData);
+                    doneCallback();
                 });
             };
-     
+        };
         tableau.registerConnector(myConnector);
         
         $(document).ready(function () {
