@@ -18,7 +18,7 @@
                 { id : "NAME", alias : "GEO Name", dataType : tableau.dataTypeEnum.string },
                 { id : "County_or_State", alias : "County/State", dataType : tableau.dataTypeEnum.string },
                 { id : "YEAR", alias : "Year", dataType : tableau.dataTypeEnum.int },
-                { id : "GEO ID", alias : "GEO ID", dataType : tableau.dataTypeEnum.string },
+                { id : "GEO_ID", alias : "GEO ID", dataType : tableau.dataTypeEnum.string },
                 { id : "SAEMHI_PT", alias : "Median Income", dataType : tableau.dataTypeEnum.float },
                 { id : "state", alias : "State ID", dataType : tableau.dataTypeEnum.string }
             ];
@@ -42,7 +42,7 @@
                         "NAME" : respST[s].NAME,
                         "County_or_State" : "State",
                         "Year" : parseInt(respST[s].YEAR),
-                        "GEO ID" : respST[s].state,
+                        "GEO_ID" : respST[s].state,
                         "SAEMHI_PT" : parseFloat(respST[s].SAEMHI_PT),
                         "state" : respST[s].state
                     };
@@ -59,7 +59,7 @@
                         "NAME" : resp[i].NAME,
                         "County_or_State" : "County",
                         "YEAR" : parseInt(resp[i].YEAR),
-                        "GEO ID" : resp[i].county,
+                        "GEO_ID" : resp[i].county,
                         "SAEMHI_PT" : parseFloat(resp[i].SAEMHI_PT),
                         "state" : resp[i].state
                     };
