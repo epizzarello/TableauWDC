@@ -1,0 +1,100 @@
+<html>
+<head>
+    <title>Median Income by State and County 2007-2020</title>
+    
+    <meta http-equiv="Cache-Control" content="no-store" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
+    <script>
+        (function () {
+        var myConnector = tableau.makeConnector();
+     
+        myConnector.getSchema = function (schemaCallback) {
+            var cols = [
+                { id : "NAME", alias : "GEO Name", dataType : tableau.dataTypeEnum.string },
+                { id : "County_or_State", alias : "County/State", dataType : tableau.dataTypeEnum.string },
+                { id : "YEAR", alias : "Year", dataType : tableau.dataTypeEnum.int },
+                { id : "county", alias : "County ID", dataType : tableau.dataTypeEnum.string },
+                { id : "SAEMHI_PT", alias : "Median Income", dataType : tableau.dataTypeEnum.float },
+                { id : "state", alias : "State ID", dataType : tableau.dataTypeEnum.string }
+            ];
+
+            var tableSchema = {
+                id : "MedianIncome",
+                alias : "Median Income",
+                columns : cols
+            };
+
+            schemaCallback([tableSchema]);
+        };
+     
+        myConnector.getData = function (table, doneCallback) {
+            $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=state&time=from+2007+to+2020", function (respST) {
+                var stateTableData = [];
+                
+                // iterate over state json array
+                for (let s = 0; s<respST.length; s++) {
+                    let stRow = {
+                        "GEO Name" : respST[s].NAME,
+                        "County/State" : "State",
+                        "Year" : parseInt(respST[s].YEAR),
+                        "GEO ID" : respST[s].state,
+                        "Median Income" : parseFloat(respST[s].SAEMHI_PT),
+                        "State ID" : respST[s].state
+                    };
+                    stateTableData.push(stRow);
+                };
+                table.appendRows(stateTableData);
+            });
+            $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=COUNTY&time=from+2007+to+2020", function (resp) {
+              var countyTableData = [];
+                
+               // iterate over the county JSON array
+                for (let i = 0; i<resp.length; i++) {
+                    let dataRow = {
+                        "GEO Name" : resp[i].NAME,
+                        "County/State" : "County",
+                        "Year" : parseInt(resp[i].YEAR),
+                        "GEO ID" : resp[i].county,
+                        "Median Income" : parseFloat(resp[i].SAEMHI_PT),
+                        "State ID" : resp[i].state
+                    };
+                    countyTableData.push(dataRow);
+                    
+                };
+
+                table.appendRows(countyTableData);
+
+                doneCallback();
+                });
+            };
+     
+        tableau.registerConnector(myConnector);
+        
+        $(document).ready(function () {
+            $("#submitButton").click(function () {
+                tableau.connectionName = "Median Income by State and County 2007-2020";
+                tableau.submit();
+            });
+        });
+
+    })();
+
+    </script>
+
+</head>
+   
+<body>
+    <div class="container container-table">
+        <div class="row vertical-center-row">
+            <div class="text-center col-md-4 col-md-offset-4">
+                <button type="button" id="submitButton" class="btn btn-success btn-lg" style="margin: 10px;">Get Median Income by State and County 2007-2020</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
