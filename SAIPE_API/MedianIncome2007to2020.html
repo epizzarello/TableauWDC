@@ -47,16 +47,22 @@
         myConnector.getData = function (table, doneCallback) {
             //check if state or county table based on table id
             if (table.tableInfo.id == "StateMedianIncome") {
-                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=state:*&time=from+2007+to+2020", function (respST) {
+                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=STATE&time=from+2007+to+2020", function (respST) {
                     var stateTableData = [];
                     
                     // iterate over state json data array
-                    for (let st = 0; st < respST.length; st++) {
+                    let stateIndexes = {
+                        "NAME":respST[0].indexOf("NAME"),
+                        "YEAR":respST[0].indexOf("YEAR"),
+                        "SAEMHI_PT":respST[0].indexOf("SAEMHI_PT"),
+                        "state":respST[0].indexOf("state")
+                    };
+                    for (let st = 1; st < respST.length; st++) {
                         stateTableData.push({
-                            "State_Name" : respST[st].NAME,
-                            "State_Year" : parseInt(respST[st].YEAR),
-                            "State_Med_Income" : parseFloat(respST[st].SAEMHI_PT),
-                            "State_ID" : respST[st].state
+                            "State_Name" : respST[st][stateIndexes.NAME],
+                            "State_Year" : parseInt(respST[st][stateIndexes."YEAR"]),
+                            "State_Med_Income" : parseFloat(respST[st][stateIndexes.SAEMHI_PT]),
+                            "State_ID" : respST[st][stateIndexes.state]
                         });
                     }
                     table.appendRows(stateTableData);
@@ -66,14 +72,22 @@
                 $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=COUNTY&time=from+2007+to+2020", function (respCT) {
                     var countyTableData = [];
                     
+                    let countyIndexes = {
+                        "NAME":respCT[0].indexOf("NAME"),
+                        "YEAR":respCT[0].indexOf("YEAR"),
+                        "SAEMHI_PT":respCT[0].indexOf("SAEMHI_PHI"),
+                        "county":respCT[0].indexOf("county"),
+                        "state":respCT[0].indexOf("state")
+                    };
+                    
                     // iterate over county level data
-                    for (let ct = 0; ct < respCT.length; ct++) {
+                    for (let ct = 1; ct < respCT.length; ct++) {
                         countyTableData.push({
-                            "County_Name" : respCT[ct].NAME,
-                            "County_Year" : respCT[ct].YEAR,
-                            "County_Med_Income" : respCT[ct].SAEMHI_PT,
-                            "County_ID" : respCT[ct].county,
-                            "County_State_ID" : respCT[ct].state
+                            "County_Name" : respCT[ct][countyIndexes.NAME],
+                            "County_Year" : parseInt(respCT[ct][countyIndexes.YEAR]),
+                            "County_Med_Income" : parseFloat(respCT[ct][countyIndexes.SAEMHI_PT]),
+                            "County_ID" : respCT[ct][countyIndexes.county],
+                            "County_State_ID" : respCT[ct][countyIndexes.state]
                         });
                     }
                     table.appendRows(countyTableData);
