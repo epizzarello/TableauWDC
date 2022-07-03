@@ -18,7 +18,7 @@
                 { id : "NAME", alias : "GEO Name", dataType : tableau.dataTypeEnum.string },
                 { id : "County_or_State", alias : "County/State", dataType : tableau.dataTypeEnum.string },
                 { id : "YEAR", alias : "Year", dataType : tableau.dataTypeEnum.int },
-                { id : "county", alias : "County ID", dataType : tableau.dataTypeEnum.string },
+                { id : "GEO ID", alias : "GEO ID", dataType : tableau.dataTypeEnum.string },
                 { id : "SAEMHI_PT", alias : "Median Income", dataType : tableau.dataTypeEnum.float },
                 { id : "state", alias : "State ID", dataType : tableau.dataTypeEnum.string }
             ];
@@ -39,12 +39,12 @@
                 // iterate over state json array
                 for (let s = 0; s<respST.length; s++) {
                     let stRow = {
-                        "GEO Name" : respST[s].NAME,
-                        "County/State" : "State",
+                        "NAME" : respST[s].NAME,
+                        "County_or_State" : "State",
                         "Year" : parseInt(respST[s].YEAR),
                         "GEO ID" : respST[s].state,
-                        "Median Income" : parseFloat(respST[s].SAEMHI_PT),
-                        "State ID" : respST[s].state
+                        "SAEMHI_PT" : parseFloat(respST[s].SAEMHI_PT),
+                        "state" : respST[s].state
                     };
                     stateTableData.push(stRow);
                 };
@@ -56,12 +56,12 @@
                // iterate over the county JSON array
                 for (let i = 0; i<resp.length; i++) {
                     let dataRow = {
-                        "GEO Name" : resp[i].NAME,
-                        "County/State" : "County",
-                        "Year" : parseInt(resp[i].YEAR),
+                        "NAME" : resp[i].NAME,
+                        "County_or_State" : "County",
+                        "YEAR" : parseInt(resp[i].YEAR),
                         "GEO ID" : resp[i].county,
-                        "Median Income" : parseFloat(resp[i].SAEMHI_PT),
-                        "State ID" : resp[i].state
+                        "SAEMHI_PT" : parseFloat(resp[i].SAEMHI_PT),
+                        "state" : resp[i].state
                     };
                     countyTableData.push(dataRow);
                     
