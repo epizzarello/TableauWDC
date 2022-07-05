@@ -14,7 +14,7 @@
         var fields = data.variables;
         for (let fieldName in fields) {
           let fieldInfo = fields[fieldName];
-          if (fieldInfo.hasOwnProperty("predicateOnly") {
+          if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
           } else {
             $("#fields").append(`<input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}">`).append(`<label for="${fieldName}">${fieldInfo.label}</label><br>`);
