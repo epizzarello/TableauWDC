@@ -17,8 +17,7 @@
           if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
           } else {
-            $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}">`)
-                .append(`<label for="${fieldName}">${fieldInfo.label}</label></div>`);
+            $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
           }
         }
           var $fields = $('.field');
