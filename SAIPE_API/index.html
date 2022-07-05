@@ -17,9 +17,17 @@
           if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
           } else {
-            $("#fields").append(`<input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}">`).append(`<label for="${fieldName}">${fieldInfo.label}</label><br>`);
+            $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}">`)
+                .append(`<label for="${fieldName}">${fieldInfo.label}</label></div>`);
           }
         }
+          var $fields = $('.field');
+          var $sorted = $($fields.toArray().sort(function(a, b) {
+              return $(a).find('input').attr('id') > $(b).find('input').attr('id')
+          }));
+          $fields.each(function(i) {
+              $(this).after($sorted.eq(i));
+          });
       });
     </script>
     <script>
