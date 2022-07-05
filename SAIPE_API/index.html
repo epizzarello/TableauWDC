@@ -1,0 +1,137 @@
+<html>
+<head>
+    <title>Median Income by State and County 2007-2020</title>
+    
+    <meta http-equiv="Cache-Control" content="no-store" />
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
+    <script>
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
+        var fields = data.variables;
+        for (let fieldName in fields) {
+          let fieldInfo = fields[fieldName];
+          if (fieldInfo.hasOwnProperty("predicateOnly") {
+              //stuff
+          } else {
+            $("#fields").append(`<input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}">`).append(`<label for="${fieldName}">${fieldInfo.label}</label><br>`);
+          }
+        }
+      });
+    <script>
+        (function () {
+        var myConnector = tableau.makeConnector();
+     
+        myConnector.getSchema = function (schemaCallback) {
+            var countyCols = [
+                { id : "County_Name", alias : "County", dataType : tableau.dataTypeEnum.string },
+                { id : "County_Year", alias : "Year (County Inc)", dataType : tableau.dataTypeEnum.int },
+                { id : "County_Med_Income", alias : "Median Income (County)", dataType : tableau.dataTypeEnum.float },
+                { id : "County_ID", alias : "County ID", dataType : tableau.dataTypeEnum.string },
+                { id : "County_State_ID", alias : "State ID (County)", dataType : tableau.dataTypeEnum.string }
+            ];
+
+            var countyTableSchema = {
+                id : "CountyMedianIncome",
+                alias : "County Median Income",
+                columns : countyCols
+            };
+            
+            var stateCols = [
+                { id : "State_Name", alias : "State", dataType : tableau.dataTypeEnum.string },
+                { id : "State_Year", alias : "Year (State Inc)", dataType : tableau.dataTypeEnum.int },
+                { id : "State_Med_Income", alias : "Median Income (State)", dataType : tableau.dataTypeEnum.float },
+                { id : "State_ID", alias : "State ID (State)", dataType : tableau.dataTypeEnum.string }
+            ];
+            
+            var stateTableSchema = {
+                id : "StateMedianIncome",
+                alias : "State Median Income",
+                columns : stateCols
+            };
+
+            schemaCallback([countyTableSchema, stateTableSchema]);
+        };
+     
+        myConnector.getData = function (table, doneCallback) {
+            //check if state or county table based on table id
+            if (table.tableInfo.id == "StateMedianIncome") {
+                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=STATE&time=from+2007+to+2020", function (respST) {
+                    var stateTableData = [];
+                    
+                    // iterate over state json data array
+                    let stateIndexes = {
+                        "NAME":respST[0].indexOf("NAME"),
+                        "YEAR":respST[0].indexOf("YEAR"),
+                        "SAEMHI_PT":respST[0].indexOf("SAEMHI_PT"),
+                        "state":respST[0].indexOf("state")
+                    };
+                    for (let st = 1; st < respST.length; st++) {
+                        stateTableData.push({
+                            "State_Name" : respST[st][stateIndexes.NAME],
+                            "State_Year" : parseInt(respST[st][stateIndexes.YEAR]),
+                            "State_Med_Income" : parseFloat(respST[st][stateIndexes.SAEMHI_PT]),
+                            "State_ID" : respST[st][stateIndexes.state]
+                        });
+                    }
+                    table.appendRows(stateTableData);
+                    doneCallback();
+                });
+            } else if (table.tableInfo.id == "CountyMedianIncome") {
+                $.getJSON("https://api.census.gov/data/timeseries/poverty/saipe?get=NAME,YEAR,SAEMHI_PT&for=COUNTY&time=from+2007+to+2020", function (respCT) {
+                    var countyTableData = [];
+                    
+                    let countyIndexes = {
+                        "NAME":respCT[0].indexOf("NAME"),
+                        "YEAR":respCT[0].indexOf("YEAR"),
+                        "SAEMHI_PT":respCT[0].indexOf("SAEMHI_PT"),
+                        "county":respCT[0].indexOf("county"),
+                        "state":respCT[0].indexOf("state")
+                    };
+                    
+                    // iterate over county level data
+                    for (let ct = 1; ct < respCT.length; ct++) {
+                        countyTableData.push({
+                            "County_Name" : respCT[ct][countyIndexes.NAME],
+                            "County_Year" : parseInt(respCT[ct][countyIndexes.YEAR]),
+                            "County_Med_Income" : parseFloat(respCT[ct][countyIndexes.SAEMHI_PT]),
+                            "County_ID" : respCT[ct][countyIndexes.county],
+                            "County_State_ID" : respCT[ct][countyIndexes.state]
+                        });
+                    }
+                    table.appendRows(countyTableData);
+                    doneCallback();
+                });
+            };
+        };
+        tableau.registerConnector(myConnector);
+        
+        $(document).ready(function () {
+            $("#submitButton").click(function () {
+                tableau.connectionName = "Median Income by State and County 2007-2020";
+                tableau.submit();
+            });
+        });
+
+    })();
+
+    </script>
+
+</head>
+   
+<body>
+    <div class="container container-table">
+        <div class="row vertical-center-row">
+            <div class="text-center col-md-4 col-md-offset-4">
+              <form id="saipe_form">
+                <div id="fields"></div>
+              </form>
+                <button type="button" id="submitButton" class="btn btn-success btn-lg" style="margin: 10px;">Get Median Income by State and County 2007-2020</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
