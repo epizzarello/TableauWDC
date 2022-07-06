@@ -18,9 +18,21 @@
             if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
             } else {
-              $("#fields").append(`<div class="row"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
+              $("#fieldsSelect").append(`<option value="${fieldName}">${fieldInfo.label}</option>`);
             }
           }
+      });
+      //populate the states based on the most recent year available
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe?get=NAME&for=state:*&time=+from+2020', function(data) {
+        let stateName = data[0].indexOf("NAME");
+        let stateID = data[0].indexOf("state");
+        let dataYear = data[0].indexOf("time");
+        let latestYear = data[data.length-1][dataYear];
+        for (let i = 1; i < data.length; i++) {
+          if (data[i][dataYear] == latestYear) {
+            $("#refineState").append(`<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
+          }
+        };
       });
     </script>
     <script>
@@ -112,6 +124,43 @@
         tableau.registerConnector(myConnector);
         
         $(document).ready(function () {
+          $('input[name="geoLevel"]').change(function () {
+            switch($(this).val()) {
+              case "us":
+                $("#counties").val("");
+                $('#allStates').remove();
+                $('.state').removeAttr('selected');
+                $("#stateRefiner, #countyRefiner").addClass("d-none");
+                break;
+              case "state":
+                $("#counties").val("");
+                $("#stateRefiner").removeClass("d-none");
+                $("#countyRefiner").addClass("d-none");
+                $("#refineStateLabel").removeClass('d-none');
+                $('#refineState').attr('multiple','multiple');
+                if ($("#refineState").val() == "*" || $("#refineState").val() == null) {
+                  $('.state').attr('selected','selected');
+                }
+                $('#allStates').remove();
+                break;
+              case "county":
+                $("#stateRefiner").removeClass("d-none");
+                $("#refineState").removeAttr('multiple').prepend('<option selected id="allStates" value="*">For All States</option>');
+                $('#refineStateLabel').addClass('d-none');
+                alert($("#refineState").val());
+                break;
+            };
+          });
+          $("#refineState").change(function () {
+            if ($("input[name=geoLevel]:checked").val() == "county") {
+              if($("#refineState").val() == "*") {
+                $("#counties").val("");
+                $("#countyRefiner").addClass("d-none");
+              } else {
+                $("#countyRefiner").removeClass("d-none");
+              };
+            };
+          });
             $("#submitButton").click(function () {
                 tableau.connectionName = "Median Income by State and County 2007-2020";
                 tableau.submit();
@@ -125,16 +174,31 @@
 </head>
    
 <body>
-    <form id="saipe_form" class="container-lg">
-        <div id="fields" class="col-md-6">Which fields would you like?</div>
-    </form>
-    <div class="container container-table">
-        <div class="row vertical-center-row">
-            <div class="text-center col-md-4 col-md-offset-4">
-                <button type="button" id="submitButton" class="btn btn-success btn-lg" style="margin: 10px;">Get Median Income by State and County 2007-2020</button>
-            </div>
+    <form id="saipe_form" class="container-lg row">
+        <div id="fields" class="col-md-6 form-group">Select any fields you would like:<select id="fieldsSelect" class="form-select" multiple size="10"></select>
+          <label class="fst-italic" id="refineStateLabel" for="fieldsSelect">Hold down shift to select consecutive states, or CTRL/Command to select each one.</label>
+      </div>
+      <div id="predicates" class="col-md-6 form-group"><div id="refineTitle">Refine your query:</div>
+        <div id="geoLevel">I want data at the 
+          <input type="radio" class="btn-check" name="geoLevel" id="us" value="us" checked>
+          <label id="usLabel" class="btn btn-outline-primary" for="us">Country Level</label>
+          <input type="radio" class="btn-check" name="geoLevel" id="state" value="state">
+          <label id="stateLabel" class="btn btn-outline-primary" for="state">State Level</label>
+          <input type="radio" class="btn-check" name="geoLevel" id="county" value="county">
+          <label id="countyLabel" class="btn btn-outline-primary" for="county">County Level</label>
         </div>
-    </div>
+        <div class="md-3 d-none" id="stateRefiner">
+          <select multiple class="form-select" id="refineState">
+          </select>
+          <label class="fst-italic" id="refineStateLabel" for="refineState">Hold down shift to select consecutive states, or CTRL/Command to select each one.</label>
+        </div>
+        <div class="form-floating d-none" id="countyRefiner">
+          <input type="text" id="counties" class="form-control" placeholder="001,003,etc." pattern="^\d{3}(,\d{3})*">
+          <label id="countiesLabel" class="" for="counties">List the 3 digit FIPS code of each county you want separated by commas <i>(Optional)</i></label>
+        </div>
+      </div>
+      <button type="button" id="submitButton" class="btn btn-success btn-lg" style="margin: 10px;">Get SAIPE Data</button>
+    </form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
