@@ -11,22 +11,17 @@
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
     <script>
       $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
-        var fields = data.variables;
-        for (let fieldName in fields) {
-          let fieldInfo = fields[fieldName];
-          if (fieldInfo.hasOwnProperty("predicateOnly")) {
+          var fields = data.variables;
+          var fieldNames = Object.keys(fields);
+          fieldNames.sort();
+          for (let fieldName of fieldNames) {
+            let fieldInfo = fields[fieldName];
+            if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
-          } else {
-            $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
+            } else {
+              $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
+            }
           }
-        }
-          var $fields = $('.field');
-          var $sorted = $($fields.toArray().sort(function(a, b) {
-              return $(a).find('input').attr('id') > $(b).find('input').attr('id')
-          }));
-          $fields.each(function(i) {
-              $(this).after($sorted.eq(i));
-          });
       });
     </script>
     <script>
