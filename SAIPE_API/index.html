@@ -4,9 +4,8 @@
     
     <meta http-equiv="Cache-Control" content="no-store" />
 
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" crossorigin="anonymous"></script>
 
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
     <script>
@@ -19,7 +18,7 @@
             if (fieldInfo.hasOwnProperty("predicateOnly")) {
               //stuff
             } else {
-              $("#fields").append(`<div class="field"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
+              $("#fields").append(`<div class="row"><input type="checkbox" id="${fieldName}" name="${fieldName}" value="${fieldName}" /><label for="${fieldName}">${fieldInfo.label}</label></div>`);
             }
           }
       });
@@ -126,8 +125,8 @@
 </head>
    
 <body>
-    <form id="saipe_form">
-        <div id="fields"></div>
+    <form id="saipe_form" class="container-lg">
+        <div id="fields" class="col-md-6">Which fields would you like?</div>
     </form>
     <div class="container container-table">
         <div class="row vertical-center-row">
@@ -136,5 +135,6 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
