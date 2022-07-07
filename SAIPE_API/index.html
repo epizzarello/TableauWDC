@@ -136,7 +136,24 @@
               for (let i = 1; i < resp.length; i++) {
                 let dataRow = {};
                 for (let c = 0; c < resp[0].length; c++) {
-                  dataRow[resp[0][c]] = resp[i][c];
+                  if (resp[0][c] == 'us' || resp[0][c] == 'state' || resp[0][c] == 'county') {
+                    dataRow[resp[0][c]] = resp[i][c];
+                  } else {
+                    switch(fields[resp[0][c]].predicateType) {
+                      case "datetime":
+                        dataRow[resp[0][c]] = parseInt(resp[i][c]);
+                        break;
+                      case "int":
+                        dataRow[resp[0][c]] = parseInt(resp[i][c]);
+                        break;
+                      case "float":
+                        dataRow[resp[0][c]] = parseFloat(resp[i][c]);
+                        break;
+                      default:
+                        dataRow[resp[0][c]] = resp[i][c];
+                        break;
+                    };
+                  };
                 };
                 tableData.push(dataRow);
               };
