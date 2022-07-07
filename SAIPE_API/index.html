@@ -27,39 +27,6 @@
       }
     </style>
     <script>
-      var fields = {};
-      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
-        fields = data.variables;
-        var fieldNames = Object.keys(fields);
-        fieldNames.sort();
-        for (let fieldName of fieldNames) {
-          let fieldInfo = fields[fieldName];
-          if (fieldInfo.hasOwnProperty("predicateOnly")) {
-            //stuff
-          } else {
-            $("#fieldsSelect").append(`
-				<option value="${fieldName}">${fieldInfo.label}</option>`);
-          }
-        }
-      });
-      //populate the states based on the most recent year available
-      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe?get=NAME&for=state:*&time=+from+2020', function(data) {
-        let stateName = data[0].indexOf("NAME");
-        let stateID = data[0].indexOf("state");
-        let dataYear = data[0].indexOf("time");
-        let latestYear = data[data.length - 1][dataYear];
-        $('.year').attr('max', latestYear);
-        $('#endYear').val(latestYear);
-        $('#maxYear').text(latestYear);
-        for (let i = 1; i < data.length; i++) {
-          if (data[i][dataYear] == latestYear) {
-            $("#refineState").append(`
-				<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
-          }
-        };
-      });
-    </script>
-    <script>
       (function() {
           var myConnector = tableau.makeConnector();
           var schemaOptions = JSON.parse(tableau.connectionData);
@@ -163,6 +130,38 @@
           };
           tableau.registerConnector(myConnector);
           $(document).ready(function() {
+		  
+      var fields = {};
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
+        fields = data.variables;
+        var fieldNames = Object.keys(fields);
+        fieldNames.sort();
+        for (let fieldName of fieldNames) {
+          let fieldInfo = fields[fieldName];
+          if (fieldInfo.hasOwnProperty("predicateOnly")) {
+            //stuff
+          } else {
+            $("#fieldsSelect").append(`
+				<option value="${fieldName}">${fieldInfo.label}</option>`);
+          }
+        }
+      });
+      //populate the states based on the most recent year available
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe?get=NAME&for=state:*&time=+from+2020', function(data) {
+        let stateName = data[0].indexOf("NAME");
+        let stateID = data[0].indexOf("state");
+        let dataYear = data[0].indexOf("time");
+        let latestYear = data[data.length - 1][dataYear];
+        $('.year').attr('max', latestYear);
+        $('#endYear').val(latestYear);
+        $('#maxYear').text(latestYear);
+        for (let i = 1; i < data.length; i++) {
+          if (data[i][dataYear] == latestYear) {
+            $("#refineState").append(`
+				<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
+          }
+        };
+      });
               $('input[name="geoLevel"]').change(function() {
                   switch ($(this).val()) {
                     case "us":
@@ -266,6 +265,8 @@
                 });
               });
           })();
+    </script>
+    <script>
     </script>
   </head>
   <body>
