@@ -8,6 +8,23 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
 
     <script src="https://connectors.tableau.com/libs/tableauwdc-2.3.latest.js" type="text/javascript"></script>
+  <style>
+    :invalid {
+      border-color:red;
+    }
+    .invalidMessage {
+      display: none;
+      color: red;
+    }
+    #saipe_form > div > div {
+      margin-top: .75em;
+      margin-bottom: .75em;
+    }
+    #saipe_form > div#predicates > div > div, #saipe_form > div#predicates > div > center{
+      margin: 0;
+      padding: 0;
+    }
+  </style>
     <script>
       $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
           var fields = data.variables;
@@ -28,6 +45,9 @@
         let stateID = data[0].indexOf("state");
         let dataYear = data[0].indexOf("time");
         let latestYear = data[data.length-1][dataYear];
+        $('.year').attr('max',latestYear);
+        $('#endYear').val(latestYear);
+        $('#maxYear').text(latestYear);
         for (let i = 1; i < data.length; i++) {
           if (data[i][dataYear] == latestYear) {
             $("#refineState").append(`<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
@@ -131,23 +151,31 @@
                 $('#allStates').remove();
                 $('.state').removeAttr('selected');
                 $("#stateRefiner, #countyRefiner").addClass("d-none");
+                $('#statesInvalid').hide();
+                $('#countiesInvalid').hide();
                 break;
               case "state":
                 $("#counties").val("");
                 $("#stateRefiner").removeClass("d-none");
                 $("#countyRefiner").addClass("d-none");
-                $("#refineStateLabel").removeClass('d-none');
-                $('#refineState').attr('multiple','multiple');
-                if ($("#refineState").val() == "*" || $("#refineState").val() == null) {
-                  $('.state').attr('selected','selected');
-                }
+                $('label[for="refineState"]').removeClass('d-none');
+                $('#refineState').prop('multiple',true);
                 $('#allStates').remove();
+                if ($("#refineState").val() == "*" || $("#refineState").val() == null) {
+                  $('.state').prop('selected',true);
+                }
+                $('#countiesInvalid').hide();
                 break;
               case "county":
                 $("#stateRefiner").removeClass("d-none");
-                $("#refineState").removeAttr('multiple').prepend('<option selected id="allStates" value="*">For All States</option>');
-                $('#refineStateLabel').addClass('d-none');
-                alert($("#refineState").val());
+                let prevVal = $("#refineState").val();
+                $("#refineState").removeAttr('multiple')
+                  .prepend('<option id="allStates" value="*">For All States</option>');
+                $('label[for="refineState"]').addClass("d-none");
+                if(prevVal == null || prevVal.length > 1) {
+                  $("#allStates").prop('selected',true);
+                };
+                $('#statesInvalid').hide();
                 break;
             };
           });
@@ -162,8 +190,41 @@
             };
           });
             $("#submitButton").click(function () {
+              //check if valid
+              let isValid = true;
+              //check to make sure at least one field is selected
+              if($('#fieldsSelect').val() == null) {
+                isValid = false;
+                $('#fieldsInvalid').show();
+              } else {
+                $('#fieldsInvalid').hide();
+              };
+              if ($("input[name=geoLevel]:checked").val() == "state" && $('#refineState').val() == null) {
+                isValid = false;
+                $('#statesInvalid').show();
+              } else {
+                $('#statesInvalid').hide();
+              }
+              if($('#counties').is(':invalid')) {
+                isValid = false;
+                $('#countiesInvalid').show();
+              } else {
+                $('#countiesInvalid').hide();
+              };
+              //check if missing one or both years or if outside the accepted range
+              if($('.year:invalid').length > 0) {
+                isValid = false;
+                $('#yearsInvalid').text('Please make sure both years are entered and within the acceptable range.').show();
+              } else if ($('#startYear').val() > $('#endYear').val()) {
+                isValid = false
+                $('#yearsInvalid').text('Your start year cannot be after your end year.').show();
+              } else {
+                $('#yearsInvalid').text('').hide();
+              }
+              if (isValid) {
                 tableau.connectionName = "Median Income by State and County 2007-2020";
                 tableau.submit();
+              }
             });
         });
 
@@ -175,8 +236,9 @@
    
 <body>
     <form id="saipe_form" class="container-lg row">
-        <div id="fields" class="col-md-6 form-group">Select any fields you would like:<select id="fieldsSelect" class="form-select" multiple size="10"></select>
-          <label class="fst-italic" id="refineStateLabel" for="fieldsSelect">Hold down shift to select consecutive states, or CTRL/Command to select each one.</label>
+        <div id="fields" class="col-md-6 form-group">Select any fields you would like:<select id="fieldsSelect" class="form-select" multiple size="10" required></select>
+          <div id="fieldsInvalid" class="invalidMessage">You must select at least one field.</div>
+          <label class="fst-italic" id="refineStateLabel" for="fieldsSelect">Hold down shift to select fields, or CTRL/Command to select each one.</label>
       </div>
       <div id="predicates" class="col-md-6 form-group"><div id="refineTitle">Refine your query:</div>
         <div id="geoLevel">I want data at the 
@@ -190,12 +252,27 @@
         <div class="md-3 d-none" id="stateRefiner">
           <select multiple class="form-select" id="refineState">
           </select>
+          <div id="statesInvalid" class="invalidMessage">You must select at least one state.</div>
           <label class="fst-italic" id="refineStateLabel" for="refineState">Hold down shift to select consecutive states, or CTRL/Command to select each one.</label>
         </div>
         <div class="form-floating d-none" id="countyRefiner">
-          <input type="text" id="counties" class="form-control" placeholder="001,003,etc." pattern="^\d{3}(,\d{3})*">
+          <input type="text" id="counties" class="form-control" placeholder="001,003,etc." pattern="^[0-9]{3}(,[0-9]{3})*">
           <label id="countiesLabel" class="" for="counties">List the 3 digit FIPS code of each county you want separated by commas <i>(Optional)</i></label>
+          <div id="countiesInvalid" class="invalidMessage">Please use the correct format: 001,003,etc.</div>
         </div>
+        <div id="time">
+        <center>Time Range</center>
+        <div class="input-group">
+  		  <span class="input-group-text">From </span>
+  		  <input min="1989" value="1989" id="startYear" type="number" class="form-control year" placeholder="Start Year" aria-label="Start Year" required>
+          <label id="startYearLabel" class="yearLabel" for="startYear"></label>
+  		  <span class="input-group-text"> to </span>
+  		  <input min="1989" id="endYear" type="number" class="form-control year" placeholder="End Year" aria-label="End Year" required>
+          <label id="endYearLabel" class="yearLabel" for="endYear"></label>
+		</div>
+        <center id="yearsInvalid" class="invalidMessage"></center>
+        <center>SAIPE data is currently available from 1989 to <span id="maxYear"></span></center>
+      </div>
       </div>
       <button type="button" id="submitButton" class="btn btn-success btn-lg" style="margin: 10px;">Get SAIPE Data</button>
     </form>
