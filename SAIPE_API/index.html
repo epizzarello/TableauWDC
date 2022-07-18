@@ -75,6 +75,7 @@
             if (schemaOptions.fields.indexOf('YEAR') >= 0) {
               schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'),1);
             };
+	      	  initCallback();
           };
           myConnector.getSchema = function(schemaCallback) {
             var cols = [{
