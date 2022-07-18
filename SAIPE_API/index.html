@@ -4,7 +4,7 @@
     <meta http-equiv="Cache-Control" content="no-store" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" type="text/javascript"></script>
-    <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.0.js" type="text/javascript"></script>
+    <script src="https://connectors.tableau.com/libs/tableauwdc-2.4.latest.js" type="text/javascript"></script>
     <style>
       :invalid {
         border-color: red;
@@ -27,53 +27,51 @@
       }
     </style>
     <script>
+      var fields = {};
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
+        fields = data.variables;
+        var fieldNames = Object.keys(fields);
+        fieldNames.sort();
+        for (let fieldName of fieldNames) {
+          let fieldInfo = fields[fieldName];
+          if (fieldInfo.hasOwnProperty("predicateOnly")) {
+            //stuff
+          } else {
+            $("#fieldsSelect").append(`
+				<option value="${fieldName}">${fieldInfo.label}</option>`);
+          }
+        }
+      });
+      //populate the states based on the most recent year available
+      $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe?get=NAME&for=state:*&time=+from+2020', function(data) {
+        let stateName = data[0].indexOf("NAME");
+        let stateID = data[0].indexOf("state");
+        let dataYear = data[0].indexOf("time");
+        let latestYear = data[data.length - 1][dataYear];
+        $('.year').attr('max', latestYear);
+        $('#endYear').val(latestYear);
+        $('#maxYear').text(latestYear);
+        for (let i = 1; i < data.length; i++) {
+          if (data[i][dataYear] == latestYear) {
+            $("#refineState").append(`
+				<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
+          }
+        };
+      });
+    </script>
+    <script>
       (function() {
           var myConnector = tableau.makeConnector();
-	      myConnector.init = function(initCallback) {
-          var fields = {};
-              $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe/variables.json', function(data) {
-                fields = data.variables;
-                var fieldNames = Object.keys(fields);
-                fieldNames.sort();
-                for (let fieldName of fieldNames) {
-                  let fieldInfo = fields[fieldName];
-                  if (fieldInfo.hasOwnProperty("predicateOnly")) {
-                    //stuff
-                  } else {
-                    $("#fieldsSelect").append(`
-				<option value="${fieldName}">${fieldInfo.label}</option>`);
-                  }
-                }
-              });
-              //populate the states based on the most recent year available
-              $.getJSON('https://api.census.gov/data/timeseries/poverty/saipe?get=NAME&for=state:*&time=+from+2020', function(data) {
-                let stateName = data[0].indexOf("NAME");
-                let stateID = data[0].indexOf("state");
-                let dataYear = data[0].indexOf("time");
-                let latestYear = data[data.length - 1][dataYear];
-                $('.year').attr('max', latestYear);
-                $('#endYear').val(latestYear);
-                $('#maxYear').text(latestYear);
-                for (let i = 1; i < data.length; i++) {
-                  if (data[i][dataYear] == latestYear) {
-                    $("#refineState").append(`
-				
-				<option class="state" value="${data[i][stateID]}">For ${data[i][stateName]}</option>`);
-                  }
-                };
-              });
-          initCallback();
-	      };
           var schemaOptions = JSON.parse(tableau.connectionData);
           //These fields would be duplicates if not removed
           if (schemaOptions.geo.length > 2 && schemaOptions.fields.indexOf('STATE') >= 0) {
-            schemaOptions.fields.splice(schemaOptions.fields.indexOf('STATE'), 1);
+            schemaOptions.fields.splice(schemaOptions.fields.indexOf('STATE'),1);
           };
           if (schemaOptions.geo == 'county' && schemaOptions.fields.indexOf('COUNTY') >= 0) {
-            schemaOptions.fields.splice(schemaOptions.fields.indexOf('COUNTY'), 1);
+            schemaOptions.fields.splice(schemaOptions.fields.indexOf('COUNTY'),1);
           };
           if (schemaOptions.fields.indexOf('YEAR') >= 0) {
-            schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'), 1);
+            schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'),1);
           };
           myConnector.getSchema = function(schemaCallback) {
             var cols = [{
@@ -120,15 +118,15 @@
             var connectOptions = JSON.parse(tableau.connectionData);
             var apiURL = "https://api.census.gov/data/timeseries/poverty/saipe?get=";
             apiURL += connectOptions.fields.join();
-            apiURL += "&for=" + connectOptions.geo
-            if (connectOptions.geo == 'state') {
-              apiURL += ':' + connectOptions.states.join();
+            apiURL += "&for="+connectOptions.geo
+            if(connectOptions.geo == 'state') {
+              apiURL += ':'+connectOptions.states.join();
             } else if (connectOptions.geo == 'county') {
               if (connectOptions.counties) {
-                apiURL += ':' + connectOptions.counties;
+                apiURL += ':'+connectOptions.counties;
               };
               if (connectOptions.states.length > 1) {
-                apiURL += '&in=state:' + connectOptions.states;
+                apiURL += '&in=state:'+connectOptions.states;
               };
             };
             apiURL += `&time=from+${connectOptions.from}+to+${connectOptions.to}`;
@@ -141,7 +139,7 @@
                   if (resp[0][c] == 'us' || resp[0][c] == 'state' || resp[0][c] == 'county') {
                     dataRow[resp[0][c]] = resp[i][c];
                   } else {
-                    switch (fields[resp[0][c]].predicateType) {
+                    switch(fields[resp[0][c]].predicateType) {
                       case "datetime":
                         dataRow[resp[0][c]] = parseInt(resp[i][c]);
                         break;
@@ -248,7 +246,7 @@
                     saipeOptions.counties = $('#counties').val();
                     saipeOptions.fields = $('#fieldsSelect').val();
                     let geo = $('input[name="geoLevel"]:checked').val();
-                    switch (geo) {
+                    switch(geo) {
                       case 'us':
                         geo = 'for the US';
                         break;
