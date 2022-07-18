@@ -188,8 +188,7 @@
                     case "county":
                       $("#stateRefiner").removeClass("d-none");
                       let prevVal = $("#refineState").val();
-                      $("#refineState").removeAttr('multiple').prepend(` < option id = "allStates"
-                        value = "*" > For All States < /option>`);
+                      $("#refineState").removeAttr('multiple').prepend('<option id = "allStates" value = "*" > For All States </option>');
                         $('label[for="refineState"]').addClass("d-none");
                         if (prevVal == null || prevVal.length > 1) {
                           $("#allStates").prop('selected', true);
