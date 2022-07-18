@@ -76,6 +76,9 @@
               schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'),1);
             };
 	      	  initCallback();
+            if(tableau.phase == tableau.phaseEnum.interactivePhase || tableau.phase == tableau.phaseEnum.authPhase) {
+              tableau.submit();
+            }
           };
           myConnector.getSchema = function(schemaCallback) {
             var cols = [{
