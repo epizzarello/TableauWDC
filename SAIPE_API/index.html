@@ -107,12 +107,27 @@
               };
             };
             for (let fieldCode of schemaOptions.fields) {
-              cols.push({
-                id: fieldCode,
-                alias: fields[fieldCode].alias,
-                dataType: tableau.dataTypeEnum[fields[fieldCode].predicateType],
-                description: fields[fieldCode].label
-              });
+              if (fields.hasOwnProperty(fieldCode) && fields[fieldCode].hasOwnProperty('predicateType')) {
+                cols.push({
+                  id: fieldCode,
+                  alias: fieldCode,
+                  dataType: tableau.dataTypeEnum[fields[fieldCode].predicateType],
+                  description: fields[fieldCode].label
+                });
+              } else if (fields.hasOwnProperty(fieldCode)) {
+                cols.push({
+                  id: fieldCode,
+                  alias: fieldCode,
+                  dataType: tableau.dataTypeEnum.string,
+                  description: fields[fieldCode].label
+                });
+              } else {
+                cols.push({
+                  id: fieldCode,
+                  alias: fieldCode,
+                  dataType: tableau.dataTypeEnum.string
+                });
+              }
             };
             var tableSchema = {
               id: "SAIPE_Data",
