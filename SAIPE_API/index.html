@@ -110,14 +110,14 @@
               if (fields.hasOwnProperty(fieldCode) && fields[fieldCode].hasOwnProperty('predicateType')) {
                 cols.push({
                   id: fieldCode,
-                  alias: fieldCode,
+                  alias: fields[fieldCode].label,
                   dataType: tableau.dataTypeEnum[fields[fieldCode].predicateType],
                   description: fields[fieldCode].label
                 });
               } else if (fields.hasOwnProperty(fieldCode)) {
                 cols.push({
                   id: fieldCode,
-                  alias: fieldCode,
+                  alias: fields[fieldCode].label,
                   dataType: tableau.dataTypeEnum.string,
                   description: fields[fieldCode].label
                 });
