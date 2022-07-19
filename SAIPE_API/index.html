@@ -64,21 +64,20 @@
           var myConnector = tableau.makeConnector();
           var schemaOptions;
           myConnector.init = function(initCallback) {
-            schemaOptions = JSON.parse(tableau.connectionData);
-            //These fields would be duplicates if not removed
-            if (schemaOptions.geo.length > 2 && schemaOptions.fields.indexOf('STATE') >= 0) {
-              schemaOptions.fields.splice(schemaOptions.fields.indexOf('STATE'),1);
-            };
-            if (schemaOptions.geo == 'county' && schemaOptions.fields.indexOf('COUNTY') >= 0) {
-              schemaOptions.fields.splice(schemaOptions.fields.indexOf('COUNTY'),1);
-            };
-            if (schemaOptions.fields.indexOf('YEAR') >= 0) {
-              schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'),1);
-            };
-	      	  initCallback();
-            if(tableau.phase == tableau.phaseEnum.interactivePhase || tableau.phase == tableau.phaseEnum.authPhase) {
-              tableau.submit();
+            if (tableau.phase == tableau.phaseEnum.gatherDataPhase) {
+              schemaOptions = JSON.parse(tableau.connectionData);
+              //These fields would be duplicates if not removed
+              if (schemaOptions.geo.length > 2 && schemaOptions.fields.indexOf('STATE') >= 0) {
+                schemaOptions.fields.splice(schemaOptions.fields.indexOf('STATE'),1);
+              };
+              if (schemaOptions.geo == 'county' && schemaOptions.fields.indexOf('COUNTY') >= 0) {
+                schemaOptions.fields.splice(schemaOptions.fields.indexOf('COUNTY'),1);
+              };
+              if (schemaOptions.fields.indexOf('YEAR') >= 0) {
+                schemaOptions.fields.splice(schemaOptions.fields.indexOf('YEAR'),1);
+              };
             }
+	      	  initCallback();
           };
           myConnector.getSchema = function(schemaCallback) {
             var cols = [{
