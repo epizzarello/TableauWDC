@@ -222,8 +222,8 @@
             tableData.push(dataRow);
           };
         };
-      };
-    });
+      });
+    };
     table.appendRows(tableData);
     doneCallback();
   };
