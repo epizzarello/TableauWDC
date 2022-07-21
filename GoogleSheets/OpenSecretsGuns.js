@@ -185,40 +185,42 @@
       };
     } else {
       const apiCall = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&tq&gid=${gids[table.tableInfo.id]}`;
-      const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
-      const labelIndexes = {};
-      //get index of which column is where
-      for (let colNum = 0; colNum < sheet.cols.length; colNum++) {
-        //make sure not blank
-        if (sheet.cols[colNum].label) {
-          labelIndexes[sheet.cols[colNum].label.toLowerCase().replace(/\s/g, "_")] = colNum;
-        };
-      };
-      //then get data
-      for (let row of sheet.rows) {
-        const dataRow = {};
-        let pushRow = true;
-        for (let col of table.tableInfo.columns) {
-          //account for total rows
-          try {
-            //ensure in correct data type
-            switch(col.dataType) {
-              case tableau.dataTypeEnum.string:
-                dataRow[col.id] = String(row.c[labelIndexes[col.id]].v);
-                break;
-              case tableau.dataTypeEnum.int:
-                dataRow[col.id] = parseInt(row.c[labelIndexes[col.id]].v);
-                break;
-              case tableau.dataTypeEnum.float:
-                dataRow[col.id] = parseFloat(row.c[labelIndexes[col.id]].v);
-                break;
-            };
-          } catch(err) {
-            pushRow = false;
+      $.getJSON(apiCall, function(resp) {
+        const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
+        const labelIndexes = {};
+        //get index of which column is where
+        for (let colNum = 0; colNum < sheet.cols.length; colNum++) {
+          //make sure not blank
+          if (sheet.cols[colNum].label) {
+            labelIndexes[sheet.cols[colNum].label.toLowerCase().replace(/\s/g, "_")] = colNum;
           };
         };
-        if (pushRow) {
-          tableData.push(dataRow);
+        //then get data
+        for (let row of sheet.rows) {
+          const dataRow = {};
+          let pushRow = true;
+          for (let col of table.tableInfo.columns) {
+            //account for total rows
+            try {
+              //ensure in correct data type
+              switch(col.dataType) {
+                case tableau.dataTypeEnum.string:
+                  dataRow[col.id] = String(row.c[labelIndexes[col.id]].v);
+                  break;
+                case tableau.dataTypeEnum.int:
+                  dataRow[col.id] = parseInt(row.c[labelIndexes[col.id]].v);
+                  break;
+                case tableau.dataTypeEnum.float:
+                  dataRow[col.id] = parseFloat(row.c[labelIndexes[col.id]].v);
+                  break;
+              };
+            } catch(err) {
+              pushRow = false;
+            };
+          };
+          if (pushRow) {
+            tableData.push(dataRow);
+          };
         };
       };
     };
