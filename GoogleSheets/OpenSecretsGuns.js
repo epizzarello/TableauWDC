@@ -105,7 +105,7 @@
     }, {
       id: 'cycle_congress',
       alias: 'Election Cycle (Congress)',
-      dataType: tableau.dataTypeEnum.string
+      dataType: tableau.dataTypeEnum.int
     }, {
       id: 'office',
       alias: 'Office',
