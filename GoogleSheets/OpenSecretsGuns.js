@@ -198,14 +198,20 @@
       for (let row of sheet.rows) {
         const dataRow = {};
         let pushRow = true;
-        for (let field in labelIndexes) {
+        for (let col of table.tableInfo.columns) {
           //account for total rows
           try {
-            //years should be ints, not floats
-            if (field === 'year' || field === 'cycle') {
-              dataRow[field] = parseInt(row.c[labelIndexes[field]].v);
-            } else {
-              dataRow[field] = row.c[labelIndexes[field]].v;
+            //ensure in correct data type
+            switch(col.dataType) {
+              case tableau.dataTypeEnum.string:
+                dataRow[col.id] = String(row.c[labelIndexes[col.id]].v);
+                break;
+              case tableau.dataTypeEnum.int:
+                dataRow[col.id] = parseInt(row.c[labelIndexes[col.id]].v);
+                break;
+              case tableau.dataTypeEnum.float:
+                dataRow[col.id] = parseFloat(row.c[labelIndexes[col.id]].v);
+                break;
             };
           } catch(err) {
             pushRow = false;
@@ -224,8 +230,8 @@
 
   // Create event listeners for when the user submits the form
   $(document).ready(function() {
-    $("#submitButton").click(function() {
-        tableau.connectionName = "OpenSecrets Guns Data"; // This will be the data source name in Tableau
+    $('#submitButton').click(function() {
+        tableau.connectionName = 'OpenSecrets Guns Data'; // This will be the data source name in Tableau
         tableau.submit(); // This sends the connector object to Tableau
     });
   });
