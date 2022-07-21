@@ -79,12 +79,12 @@
     }, {
       id: 'gun_control',
       alias: 'State Gun Control Lobbying',
-      dataType: tableau.numberFormatEnum.float,
+      dataType: tableau.dataTypeEnum.float,
       numberFormat: tableau.numberFormatEnum.currency
     }, {
       id: 'gun_rights',
       alias: 'State Gun Rights Lobbying',
-      dataType: tableau.numberFormatEnum.float,
+      dataType: tableau.dataTypeEnum.float,
       numberFormat: tableau.numberFormatEnum.currency
     }];
     const staAnnLob_table = {
