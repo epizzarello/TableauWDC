@@ -115,6 +115,10 @@
       alias: 'District ID',
       dataType: tableau.dataTypeEnum.string
     }, {
+      id: 'state_inits',
+      alias: 'State Initials',
+      dataType: tableau.dataTypeEnum.string
+    }, {
       id: 'total_contributions_from_gun_control',
       alias: 'Gun Control Contributions',
       dataType: tableau.dataTypeEnum.float,
@@ -178,6 +182,9 @@
             };
             for (let field in labelIndexes) {
               dataRow[field] = row.c[labelIndexes[field]].v;
+              if (field === 'distid') {
+                dataRow.state_inits = row.c[labelIndexes[field]].v.substr(0,2);
+              };
             };
             tableData.push(dataRow);
           };
