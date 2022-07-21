@@ -223,7 +223,7 @@
           };
         };
       };
-    };
+    });
     table.appendRows(tableData);
     doneCallback();
   };
