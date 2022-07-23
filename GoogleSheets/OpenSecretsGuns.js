@@ -158,12 +158,12 @@
     schemaCallback([fedAnnLob_table, fedOutSpe_table, staAnnLob_table, congress_table]);
   };
 
-    // Download the data
+  // Download the data
   myConnector.getData = function(table, doneCallback) {
     if(table.tableInfo.id === 'congressional_gun_lobbying') {
       for (let year in gids[table.tableInfo.id]) {
         let apiCall = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&tq&gid=${gids[table.tableInfo.id][year]}`;
-        $.getJSON(apiCall, function(resp) {
+        $.get(apiCall, function(resp) {
           const tableData = [];
           const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
           console.log(`Congress ${year} sheet: `,sheet);
@@ -199,7 +199,7 @@
       };
     } else {
       const apiCall = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&tq&gid=${gids[table.tableInfo.id]}`;
-      $.getJSON(apiCall, function(resp) {
+      $.get(apiCall, function(resp) {
         const tableData = [];
         const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
         console.log(`${table.tableInfo.id} sheet`,sheet);
