@@ -166,6 +166,7 @@
         let apiCall = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&tq&gid=${gids[table.tableInfo.id][year]}`;
         $.getJSON(apiCall, function(resp) {
           const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
+          console.log(`Congress ${year} sheet: `,sheet);
           //get index of which column is where
           const labelIndexes = {};
           for (let colNum = 0; colNum < sheet.cols.length; colNum++) {
@@ -174,7 +175,9 @@
               labelIndexes[sheet.cols[colNum].label.toLowerCase().replace(/\s/g, "_")] = colNum;
             };
           };
+          console.log('labelIndexes: ',labelIndexes);
           //then get the actual data
+          console.log('data rows: ');
           for (let row of sheet.rows) {
             //row by row
             let dataRow = {
@@ -186,6 +189,7 @@
                 dataRow.state_inits = row.c[labelIndexes[field]].v.substr(0,2);
               };
             };
+            console.log(dataRow);
             tableData.push(dataRow);
           };
         });
@@ -194,6 +198,7 @@
       const apiCall = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&tq&gid=${gids[table.tableInfo.id]}`;
       $.getJSON(apiCall, function(resp) {
         const sheet = JSON.parse(resp.match(/(?<=\().*(?=\))/gi)).table;
+        console.log(`${table.tableInfo.id} sheet`,sheet);
         const labelIndexes = {};
         //get index of which column is where
         for (let colNum = 0; colNum < sheet.cols.length; colNum++) {
@@ -202,7 +207,9 @@
             labelIndexes[sheet.cols[colNum].label.toLowerCase().replace(/\s/g, "_")] = colNum;
           };
         };
+        console.log('labelIndexes: ',labelIndexes);
         //then get data
+        console.log('data rows: ');
         for (let row of sheet.rows) {
           const dataRow = {};
           let pushRow = true;
@@ -229,12 +236,15 @@
             };
           };
           if (pushRow) {
+            console.log(dataRow);
             tableData.push(dataRow);
           };
         };
       });
     };
+    console.log(table.tableInfo.alias,tableData);
     table.appendRows(tableData);
+    console.log('And then the table: ',table);
     doneCallback();
   };
   
