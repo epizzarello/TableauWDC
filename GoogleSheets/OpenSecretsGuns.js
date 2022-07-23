@@ -220,6 +220,9 @@
                 case tableau.dataTypeEnum.float:
                   dataRow[col.id] = parseFloat(row.c[labelIndexes[col.id]].v);
                   break;
+                default:
+                  dataRow[col.id] = row.c[labelIndexes[col.id]].v;
+                  break;
               };
             } catch(err) {
               pushRow = false;
